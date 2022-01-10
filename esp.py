@@ -497,8 +497,8 @@ class ESP:
         retData = self._sendToESP(txData)
         return retData
 
-    def mqttUserConf(self):
-        txData="AT+MQTTUSERCFG=0,1,"+'"clientId",'+'"foad",'+'"foadyousefi"'+",0,0,"+'""'+"\r\n"
+    def mqttUserConf(self, scheme, clientId, userName, Password):
+        txData='AT+MQTTUSERCFG=0,{},"{}","{}","{}",0,0,""\r\n'.format(scheme, clientId, userName, Password)
         retData = self._sendToESP(txData)
         return retData
         
