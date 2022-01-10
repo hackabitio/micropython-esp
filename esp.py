@@ -359,7 +359,7 @@ class ESP:
         
     def disconnectWiFi(self):
         """
-        This fucntion use to disconnect ESP8266 with a connected WiFi AccessPoins
+        Disconnect WIFI
         
         Return:
             False on failed to disconnect the WiFi
@@ -376,8 +376,8 @@ class ESP:
 
     def _createTCPConnection(self, link, port=80):
         """
-        This fucntion use to create connect between ESP8266 and Host.
-        Just like create a socket before complete the HTTP Get/Post operation.
+        Creates a TCP connection between with the Host.
+        Just like create a socket before complete the HTTP Get/Post requests.
         
         Return:
             False on failed to create a socket connection
@@ -390,7 +390,6 @@ class ESP:
             txData="AT+CIPSTART="+'"'+"TCP"+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
         #print("txData:", txData)
         retData = self._sendToESP(txData)
-        #print(".....")
         #print(retData)
         if(retData != None):
             if ESP_OK_STATUS in retData:
@@ -402,13 +401,14 @@ class ESP:
     
     def doHttpGet(self,host,path,user_agent="RPi-Pico", port=80, headers=''):
         """
-        This fucntion use to complete a HTTP Get operation
+        Do the HTTP GET request
         
         Parameter:
             host (str): Host URL [ex: get operation URL: www.httpbin.org/ip. so, Host URL only "www.httpbin.org"]
             path (str): Get operation's URL path [ex: get operation URL: www.httpbin.org/ip. so, the path "/ip"]
             user-agent (str): User Agent Name [Default "RPi-Pico"]
             port (int): HTTP post number [Default port number 80]
+            headers (str): Extra headers, for example Authorization. Remember to add "\r\n" at the end.
         
         Return:
             HTTP error code & HTTP response[If error not equal to 200 then the response is None]
@@ -418,7 +418,6 @@ class ESP:
 
         if(self._createTCPConnection(host, port) == True):
             self._createHTTPParseObj()
-            #getHeader="GET "+path+" HTTP/1.1\r\n"+"Host: "+host+":"+str(port)+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"\r\n";
             getHeader="GET "+path+" HTTP/1.1\r\n"+headers+"Host: "+host+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"\r\n";
             print("Get header: ",getHeader,len(getHeader))
             txData="AT+CIPSEND="+str(len(getHeader))+"\r\n"
@@ -440,7 +439,7 @@ class ESP:
         
     def doHttpPost(self,host,path,user_agent,content_type,content,port=80, headers=''):
         """
-        This fucntion use to complete a HTTP Post operation
+        Do HTTP POST request
         
         Parameter:
             host (str): Host URL [ex: get operation URL: www.httpbin.org/ip. so, Host URL only "www.httpbin.org"]
@@ -449,6 +448,7 @@ class ESP:
             content_type (str): Post operation's upload content type [ex. "application/json", "application/x-www-form-urlencoded", "text/plain"
             content (str): Post operation's upload content 
             post (int): HTTP post number [Default port number 80]
+            headers (str): Extra headers, for example Authorization. Remember to add "\r\n" at the end.
         
         Return:
             HTTP error code & HTTP response[If error not equal to 200 then the response is None]
