@@ -576,6 +576,20 @@ class ESP:
         """
         txData='AT+MQTTPUB=0,"{}","{}",{},{}\r\n'.format(topic, data, str(qos), str(retain))
         retData = self.mqttRet(self._sendToESP(txData))
+        
+    def mqttSubscribe(self, topic, qos=1):
+        """
+        Subscribe to MQTT topic
+
+        Parameters:
+            topic (str): MQTT topic. Maximum length: 128 bytes.
+            qos (int): QoS of message, which can be set to 0, 1, or 2. Default: 0.
+
+        Return:
+            
+        """
+        txData='AT+MQTTSUB=0,"{}",{}\r\n'.format(topic, str(qos))
+        retData = self._sendToESP(txData)
 
     def mqttClose(self):
         """
@@ -583,6 +597,34 @@ class ESP:
         """
         retData = self.mqttRet(self._sendToESP("AT+MQTTCLEAN=0"))
 
+    def listenForIncome(self, delay=None):
+        """
+        Listen for incoming data
+
+        Parameters:
+            delay (float): Delay between scans
+
+        Return: 
+            List containing: MQTT res type, Topic, length, Message
+        """
+        self.__rxData=str()
+        self.__rxData=bytes()
+        
+        time.sleep(delay)
+        
+        while True:
+            #print(".")
+            if self.__uartObj.any()>0:
+                #print(self.__uartObj.any())
+                break
+        
+        while self.__uartObj.any()>0:
+            self.__rxData += self.__uartObj.read(UART_Rx_BUFFER_LENGTH)
+        
+        res = self.__rxData.decode('utf-8')
+        res = res.replace('\r\n', '')
+        res = res.split(',')
+        return res
         
         
     def __del__(self):
