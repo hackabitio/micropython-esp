@@ -502,8 +502,8 @@ class ESP:
         retData = self._sendToESP(txData)
         return retData
         
-    def mqttConnectionConf(self):
-        txData="AT+MQTTCONN=0,"+'"mqtt.fibel.no"'+",8883,1\r\n"
+    def mqttConnectionConf(self, host, port, reconnect=1):
+        txData="AT+MQTTCONN=0,"+'"'+host+'",'+str(port)+","+str(reconnect)+"\r\n"
         retData = self._sendToESP(txData)
         return retData
         
