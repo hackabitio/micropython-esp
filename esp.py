@@ -5,11 +5,11 @@ from httpParser import HttpParser
 ESP_OK_STATUS = "OK\r\n"
 ESP_ERROR_STATUS = "ERROR\r\n"
 ESP_FAIL_STATUS = "FAIL\r\n"
-ESP8266_WIFI_CONNECTED="WIFI CONNECTED\r\n"
-ESP8266_WIFI_GOT_IP_CONNECTED="WIFI GOT IP\r\n"
-ESP8266_WIFI_DISCONNECTED="WIFI DISCONNECT\r\n"
-ESP8266_WIFI_AP_NOT_PRESENT="WIFI AP NOT FOUND\r\n"
-ESP8266_WIFI_AP_WRONG_PWD="WIFI AP WRONG PASSWORD\r\n"
+ESP_WIFI_CONNECTED="WIFI CONNECTED\r\n"
+ESP_WIFI_GOT_IP_CONNECTED="WIFI GOT IP\r\n"
+ESP_WIFI_DISCONNECTED="WIFI DISCONNECT\r\n"
+ESP_WIFI_AP_NOT_PRESENT="WIFI AP NOT FOUND\r\n"
+ESP_WIFI_AP_WRONG_PWD="WIFI AP WRONG PASSWORD\r\n"
 ESP_BUSY_STATUS="busy p...\r\n"
 UART_Tx_BUFFER_LENGTH = 1024
 UART_Rx_BUFFER_LENGTH = 1024*2
@@ -244,12 +244,12 @@ class ESP:
         
     def getDefaultWiFiMode(self):
         """
-        This fucntion use to query ESP8266 WiFi's default mode [STA: Station, SoftAP: Software AccessPoint, or Both]
+        Get WiFi default mode [STA: Station, SoftAP: Software AccessPoint, or Both]
         
         Return:
-            STA if ESP8266's wifi's default mode pre-config as Station
-            SoftAP if ESP8266's wifi's default mode pre-config as SoftAP
-            SoftAP+STA if ESP8266's wifi's default mode set pre-config Station & SoftAP
+            STA if ESP's wifi's default mode pre-config as Station
+            SoftAP if ESP's wifi's default mode pre-config as SoftAP
+            SoftAP+STA if ESP's wifi's default mode set pre-config Station & SoftAP
             None failed to detect the wifi's default pre-config mode
         
         """
@@ -268,10 +268,10 @@ class ESP:
         
     def setDefaultWiFiMode(self, mode=3):
         """
-        This fucntion use to set ESP8266 WiFi's default mode [STA: Station, SoftAP: Software AccessPoint, or Both]
+        Set ESP WiFi's default mode [STA: Station, SoftAP: Software AccessPoint, or Both]
         
         Parameter:
-            mode (int): ESP8266 WiFi's [ 1: STA, 2: SoftAP, 3: SoftAP+STA(default)]
+            mode (int): ESP WiFi's [ 1: STA, 2: SoftAP, 3: SoftAP+STA(default)]
             
         Return:
             True on successfully set the default wifi mode
@@ -290,7 +290,7 @@ class ESP:
         
     def getAvailableAPs(self):
         """
-        This fucntion use to query ESP8266 for available WiFi AccessPoins
+        Get available WiFi AccessPoins
         
         Retuns:
             List of Available APs or None
@@ -316,17 +316,17 @@ class ESP:
         
     def connectWiFi(self,ssid,pwd):
         """
-        This fucntion use to connect ESP8266 with a WiFi AccessPoins
+        Connect to a WiFi AccessPoins
         
         Parameters:
             ssid : WiFi AP's SSID
             pwd : WiFi AP's Password
         
         Retuns:
-            WIFI DISCONNECT when ESP8266 failed connect with target AP's credential
-            WIFI AP WRONG PASSWORD when ESP8266 tried connect with taget AP with wrong password
-            WIFI AP NOT FOUND when ESP8266 cann't find the target AP
-            WIFI CONNECTED when ESP8266 successfully connect with the target AP
+            WIFI DISCONNECT when failed connect with target AP's credential
+            WIFI AP WRONG PASSWORD when tried connect with taget AP with wrong password
+            WIFI AP NOT FOUND when cann't find the target AP
+            WIFI CONNECTED when successfully connect with the target AP
         """
         txData="AT+CWJAP_CUR="+'"'+ssid+'"'+','+'"'+pwd+'"'+"\r\n"
         #print(txData)
@@ -336,24 +336,24 @@ class ESP:
         if(retData!=None):
             if "+CWJAP" in retData:
                 if "1" in retData:
-                    return ESP8266_WIFI_DISCONNECTED
+                    return ESP_WIFI_DISCONNECTED
                 elif "2" in retData:
-                    return ESP8266_WIFI_AP_WRONG_PWD
+                    return ESP_WIFI_AP_WRONG_PWD
                 elif "3" in retData:
-                    return ESP8266_WIFI_AP_NOT_PRESENT
+                    return ESP_WIFI_AP_NOT_PRESENT
                 elif "4" in retData:
-                    return ESP8266_WIFI_DISCONNECTED
+                    return ESP_WIFI_DISCONNECTED
                 else:
                     return None
-            elif ESP8266_WIFI_CONNECTED in retData:
-                if ESP8266_WIFI_GOT_IP_CONNECTED in retData:
-                    return ESP8266_WIFI_CONNECTED
+            elif ESP_WIFI_CONNECTED in retData:
+                if ESP_WIFI_GOT_IP_CONNECTED in retData:
+                    return ESP_WIFI_CONNECTED
                 else:
-                    return ESP8266_WIFI_DISCONNECTED
+                    return ESP_WIFI_DISCONNECTED
             else:
-                return ESP8266_WIFI_DISCONNECTED
+                return ESP_WIFI_DISCONNECTED
         else:
-                return ESP8266_WIFI_DISCONNECTED
+                return ESP_WIFI_DISCONNECTED
             
         
         
