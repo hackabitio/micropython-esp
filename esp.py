@@ -503,12 +503,12 @@ class ESP:
         return retData
         
     def mqttConnectionConf(self, host, port, reconnect=1):
-        txData="AT+MQTTCONN=0,"+'"'+host+'",'+str(port)+","+str(reconnect)+"\r\n"
+        txData='AT+MQTTCONN=0,"{}",{},{}\r\n'.format(host,str(port),str(reconnect))
         retData = self._sendToESP(txData)
         return retData
         
     def mqttPublish(self, topic, data, qos=1, retain=0):
-        txData="AT+MQTTPUB=0,"+'"'+topic+'"'+","+'"'+data+'"'+","+str(qos)+","+str(retain)+"\r\n"
+        txData='AT+MQTTPUB=0,"{}","{}",{},{}\r\n'.format(topic, data, str(qos), str(retain))
         retData = self._sendToESP(txData)
         if ESP_OK_STATUS in retData:
             return "OK"
