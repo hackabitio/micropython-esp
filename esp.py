@@ -30,6 +30,7 @@ class ESP:
     __rxData=None
     __txData=None
     __httpResponse=None
+    __sendDelay=1
     
     def __init__(self, uartPort=0 ,baudRate=115200, txPin=(0), rxPin=(1)):
         """
@@ -59,8 +60,11 @@ class ESP:
         else:
             #del self.__httpResponse
             self.__httpResponse=HttpParser()
+
+    def setDelay(self, delay):
+        self.__sendDelay = delay
         
-    def _sendToESP(self, atCMD, delay=1):
+    def _sendToESP(self, atCMD, delay=None):
         """
         Private function for complete ESP AT command Send/Receive operation.
         """
@@ -70,7 +74,10 @@ class ESP:
         self.__uartObj.write(self.__txData)
         self.__rxData=bytes()
         
-        time.sleep(delay)
+        delayTime = self.__sendDelay
+        if delay != None:
+            delayTime = delay
+        time.sleep(delayTime)
         
         while True:
             #print(".")
@@ -81,7 +88,7 @@ class ESP:
         while self.__uartObj.any()>0:
             self.__rxData += self.__uartObj.read(UART_Rx_BUFFER_LENGTH)
             
-        print(self.__rxData)
+        #print(self.__rxData)
         if ESP_OK_STATUS in self.__rxData:
             return self.__rxData
         elif ESP_ERROR_STATUS in self.__rxData:
@@ -330,7 +337,7 @@ class ESP:
         """
         txData="AT+CWJAP="+'"'+ssid+'"'+','+'"'+pwd+'"'+"\r\n"
         #print(txData)
-        retData = self._sendToESP(txData, delay=15)
+        retData = self._sendToESP(txData)
         #print(".....")
         #print(retData)
         if(retData!=None):
@@ -486,24 +493,24 @@ class ESP:
     
     def setTime(self):
         txData="AT+CIPSNTPCFG=1,8,"+'"ntp1.aliyun.com",'+'"ntp2.aliyun.com"'+"\r\n"
-        self._sendToESP(txData,0.2)
+        self._sendToESP(txData)
         txData="AT+CIPSNTPTIME?\r\n"
-        retData = self._sendToESP(txData,0.2)
+        retData = self._sendToESP(txData)
         return retData
 
     def mqttUserConf(self):
         txData="AT+MQTTUSERCFG=0,1,"+'"clientId",'+'"foad",'+'"foadyousefi"'+",0,0,"+'""'+"\r\n"
-        retData = self._sendToESP(txData,0.2)
+        retData = self._sendToESP(txData)
         return retData
         
     def mqttConnectionConf(self):
         txData="AT+MQTTCONN=0,"+'"mqtt.fibel.no"'+",8883,1\r\n"
-        retData = self._sendToESP(txData,0.2)
+        retData = self._sendToESP(txData)
         return retData
         
     def mqttPublish(self):
         txData="AT+MQTTPUB=0,"+'"espm2/rp",'+'"test data",'+"1,0\r\n"
-        retData = self._sendToESP(txData,0.2)
+        retData = self._sendToESP(txData)
         #retData=self.__httpResponse.parseHTTP(retData)
         return retData
         
