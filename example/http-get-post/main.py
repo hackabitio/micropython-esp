@@ -1,24 +1,23 @@
 from machine import UART, Pin
-from esp8266 import ESP8266
+from esp import ESP
 import time, sys
 
-print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+print("~"*40)
 print("RPi-Pico MicroPython Ver:", sys.version)
-print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+print("~"*40)
 
 
 ## Create On-board Led object
 led=Pin(25,Pin.OUT)
 
 ## Create an ESP8266 Object
-esp01 = ESP8266()
+esp01 = ESP()
 esp8266_at_ver = None
 
-print("StartUP",esp01.startUP())
-#print("ReStart",esp01.reStart())
+print("ReStart",esp01.reStart())
 print("StartUP",esp01.startUP())
 print("Echo-Off",esp01.echoING())
-print("\r\n\r\n")
+print("\r\n")
 
 '''
 Print ESP8266 AT comand version and SDK details
@@ -38,7 +37,7 @@ esp01.setCurrentWiFiMode()
     #for item in tuple(items):
     #    print(item)
   
-print("\r\n\r\n")
+print("\r\n")
 
 '''
 Connect with the WiFi
@@ -68,7 +67,6 @@ while(1):
     print("HTTP Code:",httpCode)
     print("HTTP Response:",httpRes)
     print("-----------------------------------------------------------------------------\r\n\r\n")
-    
     
     '''
     Going to do HTTP Post Operation with www.httpbin.org/post
