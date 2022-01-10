@@ -489,19 +489,16 @@ class ESP:
         self._sendToESP(txData,0.2)
         txData="AT+CIPSNTPTIME?\r\n"
         retData = self._sendToESP(txData,0.2)
-        print("Setting time here:", retData)
         return retData
 
     def mqttUserConf(self):
         txData="AT+MQTTUSERCFG=0,1,"+'"clientId",'+'"foad",'+'"foadyousefi"'+",0,0,"+'""'+"\r\n"
         retData = self._sendToESP(txData,0.2)
-        print("Configuring user")
         return retData
         
     def mqttConnectionConf(self):
         txData="AT+MQTTCONN=0,"+'"mqtt.fibel.no"'+",8883,1\r\n"
         retData = self._sendToESP(txData,0.2)
-        print("Configuring connection")
         return retData
         
     def mqttPublish(self):
