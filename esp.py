@@ -577,6 +577,12 @@ class ESP:
         txData='AT+MQTTPUB=0,"{}","{}",{},{}\r\n'.format(topic, data, str(qos), str(retain))
         retData = self.mqttRet(self._sendToESP(txData))
 
+    def mqttClose(self):
+        """
+        Close MQTT connection
+        """
+        retData = self.mqttRet(self._sendToESP("AT+MQTTCLEAN=0"))
+
         
         
     def __del__(self):
