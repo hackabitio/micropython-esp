@@ -15,10 +15,10 @@ UART_Tx_BUFFER_LENGTH = 1024
 UART_Rx_BUFFER_LENGTH = 1024*2
 
 
-class ESP8266:
+class ESP:
     """
-    This is a class for access ESP8266 using AT commands
-    Using this class, you access WiFi and do HTTP Post/Get operations.
+    This is a class for access ESP using AT commands
+    Using this class, you access WiFi and send HTTP Post/Get requests and execute MQTT commands.
     
     Attributes:
         uartPort (int): The Uart port numbet of the RPI Pico's UART BUS [Default UART0]
@@ -33,7 +33,7 @@ class ESP8266:
     
     def __init__(self, uartPort=0 ,baudRate=115200, txPin=(0), rxPin=(1)):
         """
-        The constaructor for ESP8266 class
+        The constaructor for ESP class
         
         Parameters:
             uartPort (int): The Uart port numbet of the RPI Pico's UART BUS [Default UART0]
@@ -45,15 +45,13 @@ class ESP8266:
         self.__baudRate=baudRate
         self.__txPin=txPin
         self.__rxPin=rxPin
-        #print(self.__uartPort,       self.__baudRate,        self.__txPin,        self.__rxPin)
+        #print(self.__uartPort, self.__baudRate, self.__txPin, self.__rxPin)
         self.__uartObj = UART(self.__uartPort, baudrate=self.__baudRate, tx=Pin(self.__txPin), rx=Pin(self.__rxPin), txbuf=UART_Tx_BUFFER_LENGTH, rxbuf=UART_Rx_BUFFER_LENGTH)
         #print(self.__uartObj)
         
     def _createHTTPParseObj(self):
         """
-        This is private function for create HTTP response every time
-        before doing the HTTP Post/Get operation
-        
+        Private function for create HTTP response before executing HTTP Post/Get request
         """
         if(self.__httpResponse != None):
             del self.__httpResponse
@@ -62,20 +60,17 @@ class ESP8266:
             #del self.__httpResponse
             self.__httpResponse=HttpParser()
         
-    def _sendToESP8266(self, atCMD, delay=1):
+    def _sendToESP(self, atCMD, delay=1):
         """
-        This is private function for complete ESP8266 AT command Send/Receive operation.
+        Private function for complete ESP AT command Send/Receive operation.
         """
         self.__rxData=str()
         self.__txData=atCMD
-        #print("---------------------------"+self.__txData)
+        #print("---"+self.__txData)
         self.__uartObj.write(self.__txData)
         self.__rxData=bytes()
         
         time.sleep(delay)
-        
-        #while self.__uartObj.any()>0:
-        #    self.__rxData += self.__uartObj.read(1)
         
         while True:
             #print(".")
@@ -100,13 +95,13 @@ class ESP8266:
         
     def startUP(self):
         """
-        This funtion use to check the communication between ESP8266 & RPI Pico
+        This funtion use to check the communication with ESP
         
         Return:
-            True if communication success with the ESP8266
-            False if unable to communication with the ESP8266
+            True if communication success with the ESP
+            False if unable to communication with the ESP
         """
-        retData = self._sendToESP8266("AT\r\n")
+        retData = self._sendToESP("AT\r\n")
         if(retData != None):
             if ESP8266_OK_STATUS in retData:
                 return True
@@ -123,7 +118,7 @@ class ESP8266:
             True if Reset successfully done with the ESP8266
             False if unable to reset the ESP8266
         """
-        retData = self._sendToESP8266("AT+RST\r\n")
+        retData = self._sendToESP("AT+RST\r\n")
         if(retData != None):
             if ESP8266_OK_STATUS in retData:
                 time.sleep(5)
@@ -145,7 +140,7 @@ class ESP8266:
         
         """
         if enable==False:
-            retData = self._sendToESP8266("ATE0\r\n")
+            retData = self._sendToESP("ATE0\r\n")
             if(retData != None):
                 if ESP8266_OK_STATUS in retData:
                     return True
@@ -154,7 +149,7 @@ class ESP8266:
             else:
                 return False
         else:
-            retData = self._sendToESP8266("ATE1\r\n")
+            retData = self._sendToESP("ATE1\r\n")
             if(retData != None):
                 if ESP8266_OK_STATUS in retData:
                     return True
@@ -171,7 +166,7 @@ class ESP8266:
         Return:
             Version details on success else None
         """
-        retData = self._sendToESP8266("AT+GMR\r\n")
+        retData = self._sendToESP("AT+GMR\r\n")
         if(retData != None):
             if ESP8266_OK_STATUS in retData:
                 #print(str(retData,"utf-8"))
@@ -193,7 +188,7 @@ class ESP8266:
             True on ESP8266 restore succesfully
             False on failed to restore ESP8266
         """
-        retData = self._sendToESP8266("AT+RESTORE\r\n")
+        retData = self._sendToESP("AT+RESTORE\r\n")
         if(retData != None):
             if ESP8266_OK_STATUS in retData:   
                 return True
@@ -203,7 +198,7 @@ class ESP8266:
             return None
     """    
     def chcekSYSRAM(self):
-        #retData = self._sendToESP8266("AT+SYSRAM?\r\n")   
+        #retData = self._sendToESP("AT+SYSRAM?\r\n")   
         self.__rxData=b''
         self.__txData="AT+SYSRAM?\r\n"
         self.__uartObj.write(self.__txData)
@@ -231,7 +226,7 @@ class ESP8266:
             SoftAP+STA if ESP8266's wifi's current mode set pre-config Station & SoftAP
             None failed to detect the wifi's current pre-config mode
         """
-        retData = self._sendToESP8266("AT+CWMODE_CUR?\r\n")
+        retData = self._sendToESP("AT+CWMODE_CUR?\r\n")
         if(retData != None):
             if "1" in retData:
                 return "STA"
@@ -258,7 +253,7 @@ class ESP8266:
         
         """
         txData="AT+CWMODE_CUR="+str(mode)+"\r\n"
-        retData = self._sendToESP8266(txData)
+        retData = self._sendToESP(txData)
         if(retData!=None):
             if ESP8266_OK_STATUS in retData:   
                 return True
@@ -278,7 +273,7 @@ class ESP8266:
             None failed to detect the wifi's default pre-config mode
         
         """
-        retData = self._sendToESP8266("AT+CWMODE_DEF?\r\n")
+        retData = self._sendToESP("AT+CWMODE_DEF?\r\n")
         if(retData!=None):
             if "1" in retData:
                 return "STA"
@@ -304,7 +299,7 @@ class ESP8266:
             
         """
         txData="AT+CWMODE_DEF="+str(mode)+"\r\n"
-        retData = self._sendToESP8266(txData)
+        retData = self._sendToESP(txData)
         if(retData!=None):
             if ESP8266_OK_STATUS in retData:   
                 return True
@@ -320,7 +315,7 @@ class ESP8266:
         Retuns:
             List of Available APs or None
         """
-        retData = str(self._sendToESP8266("AT+CWLAP\r\n", delay=10))
+        retData = str(self._sendToESP("AT+CWLAP\r\n", delay=10))
         if(retData != None):
             retData = retData.replace("+CWLAP:", "")
             retData = retData.replace(r"\r\n\r\nOK\r\n", "")
@@ -355,7 +350,7 @@ class ESP8266:
         """
         txData="AT+CWJAP_CUR="+'"'+ssid+'"'+','+'"'+pwd+'"'+"\r\n"
         #print(txData)
-        retData = self._sendToESP8266(txData, delay=15)
+        retData = self._sendToESP(txData, delay=15)
         #print(".....")
         #print(retData)
         if(retData!=None):
@@ -390,7 +385,7 @@ class ESP8266:
             False on failed to disconnect the WiFi
             True on successfully disconnected
         """
-        retData = self._sendToESP8266("AT+CWQAP\r\n")
+        retData = self._sendToESP("AT+CWQAP\r\n")
         if(retData!=None):
             if ESP8266_OK_STATUS in retData:
                 return True
@@ -408,10 +403,13 @@ class ESP8266:
             False on failed to create a socket connection
             True on successfully create and establish a socket connection.
         """
-        #self._sendToESP8266("AT+CIPMUX=0")
-        txData="AT+CIPSTART="+'"'+"TCP"+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
-        #print(txData)
-        retData = self._sendToESP8266(txData)
+        #self._sendToESP("AT+CIPMUX=0")
+        if port == 443:
+            txData="AT+CIPSTART="+'"'+"SSL"+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
+        else:
+            txData="AT+CIPSTART="+'"'+"TCP"+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
+        #print("txData:", txData)
+        retData = self._sendToESP(txData)
         #print(".....")
         #print(retData)
         if(retData != None):
@@ -422,7 +420,7 @@ class ESP8266:
         else:
             False
     
-    def doHttpGet(self,host,path,user_agent="RPi-Pico", port=80):
+    def doHttpGet(self,host,path,user_agent="RPi-Pico", port=80, headers=''):
         """
         This fucntion use to complete a HTTP Get operation
         
@@ -430,24 +428,25 @@ class ESP8266:
             host (str): Host URL [ex: get operation URL: www.httpbin.org/ip. so, Host URL only "www.httpbin.org"]
             path (str): Get operation's URL path [ex: get operation URL: www.httpbin.org/ip. so, the path "/ip"]
             user-agent (str): User Agent Name [Default "RPi-Pico"]
-            post (int): HTTP post number [Default port number 80]
+            port (int): HTTP post number [Default port number 80]
         
         Return:
             HTTP error code & HTTP response[If error not equal to 200 then the response is None]
             On failed return 0 and None
         
         """
+
         if(self._createTCPConnection(host, port) == True):
             self._createHTTPParseObj()
             #getHeader="GET "+path+" HTTP/1.1\r\n"+"Host: "+host+":"+str(port)+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"\r\n";
-            getHeader="GET "+path+" HTTP/1.1\r\n"+"Host: "+host+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"\r\n";
-            #print(getHeader,len(getHeader))
+            getHeader="GET "+path+" HTTP/1.1\r\n"+headers+"Host: "+host+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"\r\n";
+            print("Get header: ",getHeader,len(getHeader))
             txData="AT+CIPSEND="+str(len(getHeader))+"\r\n"
-            retData = self._sendToESP8266(txData)
+            retData = self._sendToESP(txData)
             if(retData != None):
                 if ">" in retData:
-                    retData = self._sendToESP8266(getHeader, delay=2)
-                    self._sendToESP8266("AT+CIPCLOSE\r\n")
+                    retData = self._sendToESP(getHeader, delay=2)
+                    self._sendToESP("AT+CIPCLOSE\r\n")
                     retData=self.__httpResponse.parseHTTP(retData)
                     return retData, self.__httpResponse.getHTTPResponse()
                 else:
@@ -455,11 +454,11 @@ class ESP8266:
             else:
                 return 0, None
         else:
-            self._sendToESP8266("AT+CIPCLOSE\r\n")
+            self._sendToESP("AT+CIPCLOSE\r\n")
             return 0, None
             
         
-    def doHttpPost(self,host,path,user_agent="RPi-Pico",content_type,content,port=80):
+    def doHttpPost(self,host,path,user_agent,content_type,content,port=80, headers=''):
         """
         This fucntion use to complete a HTTP Post operation
         
@@ -478,15 +477,15 @@ class ESP8266:
         """
         if(self._createTCPConnection(host, port) == True):
             self._createHTTPParseObj()
-            postHeader="POST "+path+" HTTP/1.1\r\n"+"Host: "+host+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"Content-Type: "+content_type+"\r\n"+"Content-Length: "+str(len(content))+"\r\n"+"\r\n"+content+"\r\n";
+            postHeader="POST "+path+" HTTP/1.1\r\n"+headers+"Host: "+host+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"Content-Type: "+content_type+"\r\n"+"Content-Length: "+str(len(content))+"\r\n"+"\r\n"+content+"\r\n";
             #print(postHeader,len(postHeader))
             txData="AT+CIPSEND="+str(len(postHeader))+"\r\n"
-            retData = self._sendToESP8266(txData)
+            retData = self._sendToESP(txData)
             if(retData != None):
                 if ">" in retData:
-                    retData = self._sendToESP8266(postHeader, delay=2)
+                    retData = self._sendToESP(postHeader, delay=2)
                     #print(".......@@",retData)            
-                    self._sendToESP8266("AT+CIPCLOSE\r\n")
+                    self._sendToESP("AT+CIPCLOSE\r\n")
                     #print(self.__httpResponse)
                     retData=self.__httpResponse.parseHTTP(retData)
                     return retData, self.__httpResponse.getHTTPResponse()
@@ -495,7 +494,7 @@ class ESP8266:
             else:
                 return 0, None
         else:
-            self._sendToESP8266("AT+CIPCLOSE\r\n")
+            self._sendToESP("AT+CIPCLOSE\r\n")
             return 0, None
         
     def __del__(self):
@@ -504,4 +503,3 @@ class ESP8266:
         """
         print('Destructor called, ESP8266 deleted.')
         pass
-        
