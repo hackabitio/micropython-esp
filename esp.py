@@ -2,15 +2,15 @@ from machine import UART, Pin
 import time
 from httpParser import HttpParser
 
-ESP8266_OK_STATUS = "OK\r\n"
-ESP8266_ERROR_STATUS = "ERROR\r\n"
-ESP8266_FAIL_STATUS = "FAIL\r\n"
+ESP_OK_STATUS = "OK\r\n"
+ESP_ERROR_STATUS = "ERROR\r\n"
+ESP_FAIL_STATUS = "FAIL\r\n"
 ESP8266_WIFI_CONNECTED="WIFI CONNECTED\r\n"
 ESP8266_WIFI_GOT_IP_CONNECTED="WIFI GOT IP\r\n"
 ESP8266_WIFI_DISCONNECTED="WIFI DISCONNECT\r\n"
 ESP8266_WIFI_AP_NOT_PRESENT="WIFI AP NOT FOUND\r\n"
 ESP8266_WIFI_AP_WRONG_PWD="WIFI AP WRONG PASSWORD\r\n"
-ESP8266_BUSY_STATUS="busy p...\r\n"
+ESP_BUSY_STATUS="busy p...\r\n"
 UART_Tx_BUFFER_LENGTH = 1024
 UART_Rx_BUFFER_LENGTH = 1024*2
 
@@ -82,13 +82,13 @@ class ESP:
             self.__rxData += self.__uartObj.read(UART_Rx_BUFFER_LENGTH)
             
         #print(self.__rxData)
-        if ESP8266_OK_STATUS in self.__rxData:
+        if ESP_OK_STATUS in self.__rxData:
             return self.__rxData
-        elif ESP8266_ERROR_STATUS in self.__rxData:
+        elif ESP_ERROR_STATUS in self.__rxData:
             return self.__rxData
-        elif ESP8266_FAIL_STATUS in self.__rxData:
+        elif ESP_FAIL_STATUS in self.__rxData:
             return self.__rxData
-        elif ESP8266_BUSY_STATUS in self.__rxData:
+        elif ESP_BUSY_STATUS in self.__rxData:
             return "ESP BUSY\r\n"
         else:
             return None
@@ -103,7 +103,7 @@ class ESP:
         """
         retData = self._sendToESP("AT\r\n")
         if(retData != None):
-            if ESP8266_OK_STATUS in retData:
+            if ESP_OK_STATUS in retData:
                 return True
             else:
                 return False
@@ -112,7 +112,7 @@ class ESP:
     
     def reStart(self):
         """
-        This funtion use to Reset the ESP8266
+        This funtion use to Reset the ESP
         
         Return:
             True if Reset successfully done with the ESP8266
@@ -120,9 +120,8 @@ class ESP:
         """
         retData = self._sendToESP("AT+RST\r\n")
         if(retData != None):
-            if ESP8266_OK_STATUS in retData:
+            if ESP_OK_STATUS in retData:
                 time.sleep(5)
-                #self.startUP()
                 return self.startUP()
             else:
                 return False
@@ -142,7 +141,7 @@ class ESP:
         if enable==False:
             retData = self._sendToESP("ATE0\r\n")
             if(retData != None):
-                if ESP8266_OK_STATUS in retData:
+                if ESP_OK_STATUS in retData:
                     return True
                 else:
                     return False
@@ -151,7 +150,7 @@ class ESP:
         else:
             retData = self._sendToESP("ATE1\r\n")
             if(retData != None):
-                if ESP8266_OK_STATUS in retData:
+                if ESP_OK_STATUS in retData:
                     return True
                 else:
                     return False
@@ -168,7 +167,7 @@ class ESP:
         """
         retData = self._sendToESP("AT+GMR\r\n")
         if(retData != None):
-            if ESP8266_OK_STATUS in retData:
+            if ESP_OK_STATUS in retData:
                 #print(str(retData,"utf-8"))
                 retData = str(retData).partition(r"OK")[0]
                 #print(str(retData,"utf-8"))
@@ -190,7 +189,7 @@ class ESP:
         """
         retData = self._sendToESP("AT+RESTORE\r\n")
         if(retData != None):
-            if ESP8266_OK_STATUS in retData:   
+            if ESP_OK_STATUS in retData:   
                 return True
             else:
                 return False
@@ -210,7 +209,7 @@ class ESP:
             self.__rxData += self.__uartObj.read(1)
             
         print(self.__rxData.decode())
-        if ESP8266_OK_STATUS in self.__rxData:
+        if ESP_OK_STATUS in self.__rxData:
             return self.__rxData
         else:
             return 1
@@ -255,7 +254,7 @@ class ESP:
         txData="AT+CWMODE_CUR="+str(mode)+"\r\n"
         retData = self._sendToESP(txData)
         if(retData!=None):
-            if ESP8266_OK_STATUS in retData:   
+            if ESP_OK_STATUS in retData:   
                 return True
             else:
                 return False
@@ -301,7 +300,7 @@ class ESP:
         txData="AT+CWMODE_DEF="+str(mode)+"\r\n"
         retData = self._sendToESP(txData)
         if(retData!=None):
-            if ESP8266_OK_STATUS in retData:   
+            if ESP_OK_STATUS in retData:   
                 return True
             else:
                 return False
@@ -387,7 +386,7 @@ class ESP:
         """
         retData = self._sendToESP("AT+CWQAP\r\n")
         if(retData!=None):
-            if ESP8266_OK_STATUS in retData:
+            if ESP_OK_STATUS in retData:
                 return True
             else:
                 return False
@@ -413,7 +412,7 @@ class ESP:
         #print(".....")
         #print(retData)
         if(retData != None):
-            if ESP8266_OK_STATUS in retData:
+            if ESP_OK_STATUS in retData:
                 return True
             else:
                 return False
