@@ -1,4 +1,3 @@
-from typing import Protocol
 from machine import UART, Pin
 import time
 from httpParser import HttpParser
@@ -53,13 +52,12 @@ class ESP:
         
     def _createHTTPParseObj(self):
         """
-        Private function for create HTTP response before executing HTTP Post/Get request
+        Private function for creating HTTP response before executing HTTP Post/Get request
         """
         if(self.__httpResponse != None):
             del self.__httpResponse
             self.__httpResponse=HttpParser()
         else:
-            #del self.__httpResponse
             self.__httpResponse=HttpParser()
 
     def setDelay(self, delay):
@@ -512,10 +510,7 @@ class ESP:
     def mqttPublish(self):
         txData="AT+MQTTPUB=0,"+'"espm2/rp",'+'"test data",'+"1,0\r\n"
         retData = self._sendToESP(txData)
-
-        retData=self.__httpResponse.parseHTTP(retData)
-        return retData, self.__httpResponse.getHTTPResponse()
-        #retData=self.__httpResponse.parseHTTP(retData)
+        return retData
         
         
     def __del__(self):
