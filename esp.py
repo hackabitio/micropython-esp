@@ -427,7 +427,7 @@ class ESP:
 
         if(self._createTCPConnection(host, port) == True):
             self._createHTTPParseObj()
-            getHeader="GET "+path+" HTTP/1.1\r\n"+headers+"Host: "+host+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"\r\n";
+            getHeader='GET {} HTTP/1.1\r\n{}Host: {}\r\nUser-Agent: {}\r\n\r\n'.format(path, headers, host, user_agent)
             print("Get header: ",getHeader,len(getHeader))
             txData="AT+CIPSEND="+str(len(getHeader))+"\r\n"
             retData = self._sendToESP(txData)
@@ -466,8 +466,7 @@ class ESP:
         """
         if(self._createTCPConnection(host, port) == True):
             self._createHTTPParseObj()
-            postHeader="POST "+path+" HTTP/1.1\r\n"+headers+"Host: "+host+"\r\n"+"User-Agent: "+user_agent+"\r\n"+"Content-Type: "+content_type+"\r\n"+"Content-Length: "+str(len(content))+"\r\n"+"\r\n"+content+"\r\n";
-            #print(postHeader,len(postHeader))
+            postHeader='POST {} HTTP/1.1\r\n{}Host: {}\r\nUser-Agent: {}\r\nContent-Type: {}\r\nContent-Length: {}\r\n\r\n{}\r\n'.format(path, headers, host, user_agent, content_type, str(len(content)), content)
             txData="AT+CIPSEND="+str(len(postHeader))+"\r\n"
             retData = self._sendToESP(txData)
             if(retData != None):
@@ -491,7 +490,7 @@ class ESP:
     """
     
     def setTime(self):
-        txData="AT+CIPSNTPCFG=1,8,"+'"ntp1.aliyun.com",'+'"ntp2.aliyun.com"'+"\r\n"
+        txData='AT+CIPSNTPCFG=1,8,"ntp1.aliyun.com","ntp2.aliyun.com"\r\n'
         self._sendToESP(txData)
         txData="AT+CIPSNTPTIME?\r\n"
         retData = self._sendToESP(txData)
