@@ -301,7 +301,7 @@ class ESP:
         Retuns:
             List of Available APs or None
         """
-        retData = str(self._sendToESP("AT+CWLAP\r\n", delay=10))
+        retData = str(self._sendToESP("AT+CWLAP\r\n"))
         if(retData != None):
             retData = retData.replace("+CWLAP:", "")
             retData = retData.replace(r"\r\n\r\nOK\r\n", "")
@@ -507,10 +507,19 @@ class ESP:
         retData = self._sendToESP(txData)
         return retData
         
-    def mqttPublish(self):
-        txData="AT+MQTTPUB=0,"+'"espm2/rp",'+'"test data",'+"1,0\r\n"
+    def mqttPublish(self, topic, data, qos=1, retain=0):
+        txData="AT+MQTTPUB=0,"+'"'+topic+'"'+","+'"'+data+'"'+","+str(qos)+","+str(retain)+"\r\n"
         retData = self._sendToESP(txData)
-        return retData
+        if ESP_OK_STATUS in retData:
+            return "OK"
+        elif ESP_ERROR_STATUS in retData:
+            return "ERROR"
+        elif ESP_FAIL_STATUS in retData:
+            return "FAIL"
+        elif ESP_BUSY_STATUS in retData:
+            return "ESP BUSY\r\n"
+        else:
+            return None
         
         
     def __del__(self):
