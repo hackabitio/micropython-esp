@@ -334,7 +334,7 @@ class ESP:
             WIFI AP NOT FOUND when cann't find the target AP
             WIFI CONNECTED when successfully connect with the target AP
         """
-        txData="AT+CWJAP="+'"'+ssid+'"'+','+'"'+pwd+'"'+"\r\n"
+        txData='AT+CWJAP="{}","{}"\r\n'.format(ssid, pwd)
         #print(txData)
         retData = self._sendToESP(txData)
         #print(".....")
@@ -396,7 +396,7 @@ class ESP:
         reqProtocol = "TCP"
         if port == 443:
             reqProtocol = "SSL"
-        txData="AT+CIPSTART="+'"'+reqProtocol+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
+        txData='AT+CIPSTART="{}","{}",{}\r\n'.format(reqProtocol, link, str(port))
         #print("txData:", txData)
         retData = self._sendToESP(txData)
         #print(retData)
@@ -422,7 +422,6 @@ class ESP:
         Return:
             HTTP error code & HTTP response[If error not equal to 200 then the response is None]
             On failed return 0 and None
-        
         """
 
         if(self._createTCPConnection(host, port) == True):
@@ -489,26 +488,13 @@ class ESP:
     MQTT operations
     """
     
-    def setTime(self):
-        txData='AT+CIPSNTPCFG=1,8,"ntp1.aliyun.com","ntp2.aliyun.com"\r\n'
-        self._sendToESP(txData)
-        txData="AT+CIPSNTPTIME?\r\n"
-        retData = self._sendToESP(txData)
-        return retData
+    def mqttRet(self, retData):
+        """
+        Return string for most of MQTT methods
 
-    def mqttUserConf(self, scheme, clientId, userName, Password):
-        txData='AT+MQTTUSERCFG=0,{},"{}","{}","{}",0,0,""\r\n'.format(scheme, clientId, userName, Password)
-        retData = self._sendToESP(txData)
-        return retData
-        
-    def mqttConnectionConf(self, host, port, reconnect=1):
-        txData='AT+MQTTCONN=0,"{}",{},{}\r\n'.format(host,str(port),str(reconnect))
-        retData = self._sendToESP(txData)
-        return retData
-        
-    def mqttPublish(self, topic, data, qos=1, retain=0):
-        txData='AT+MQTTPUB=0,"{}","{}",{},{}\r\n'.format(topic, data, str(qos), str(retain))
-        retData = self._sendToESP(txData)
+        Parameters:
+            retData (str): Return data from AT command
+        """
         if ESP_OK_STATUS in retData:
             return "OK"
         elif ESP_ERROR_STATUS in retData:
@@ -519,6 +505,78 @@ class ESP:
             return "ESP BUSY\r\n"
         else:
             return None
+
+    def setTime(self):
+        """
+        Setting correct timezone
+        """
+        txData='AT+CIPSNTPCFG=1,8,"ntp1.aliyun.com","ntp2.aliyun.com"\r\n'
+        self._sendToESP(txData)
+        txData="AT+CIPSNTPTIME?\r\n"
+        retData = self._sendToESP(txData)
+        return retData
+
+    def mqttUserConf(self, scheme, clientId, userName, password):
+        """
+        Setting user configuration
+        
+        Parameters:
+            scheme (int): Connection scheme. As follow:
+                1: MQTT over TCP.
+                2: MQTT over TLS (no certificate verify).
+                3: MQTT over TLS (verify server certificate).
+                4: MQTT over TLS (provide client certificate).
+                5: MQTT over TLS (verify server certificate and provide client certificate).
+                6: MQTT over WebSocket (based on TCP).
+                7: MQTT over WebSocket Secure (based on TLS, no certificate verify).
+                8: MQTT over WebSocket Secure (based on TLS, verify server certificate).
+                9: MQTT over WebSocket Secure (based on TLS, provide client certificate).
+                10: MQTT over WebSocket Secure (based on TLS, verify server certificate and provide client certificate).
+            clientId (str): MQTT client ID. Maximum length: 256 bytes.
+            userName (str): The username to login to the MQTT broker. Maximum length: 64 bytes.
+            password (str): the password to login to the MQTT broker. Maximum length: 64 bytes.
+
+        Return:
+            mqttRet string
+        """
+        txData='AT+MQTTUSERCFG=0,{},"{}","{}","{}",0,0,""\r\n'.format(scheme, clientId, userName, password)
+        retData = self._sendToESP(txData)
+        return self.mqttRet(retData)
+        
+    def mqttConnectionConf(self, host, port, reconnect=1):
+        """
+        Configure connection
+
+        Parameters:
+            host (str): MQTT broker domain. Maximum length: 128 bytes.
+            port (int): MQTT broker port. Maximum: port 65535.
+            reconnect (int): Following values:
+                0: MQTT will not reconnect automatically.
+                1: MQTT will reconnect automatically. It takes more resources.
+
+        Return:
+            mqttRet string
+        """
+        txData='AT+MQTTCONN=0,"{}",{},{}\r\n'.format(host,str(port),str(reconnect))
+        retData = self._sendToESP(txData)
+        return self.mqttRet(retData)
+        
+    def mqttPublish(self, topic, data, qos=1, retain=0):
+        """
+        Publish message to MQTT server
+
+        Parameters:
+            topic (str): MQTT topic. Maximum length: 128 bytes.
+            data (str): MQTT message in string.
+            qos (int): QoS of message, which can be set to 0, 1, or 2. Default: 0.
+            retain (int): retain flag.
+
+        Return:
+            mqttRet string
+        """
+        txData='AT+MQTTPUB=0,"{}","{}",{},{}\r\n'.format(topic, data, str(qos), str(retain))
+        retData = self.mqttRet(self._sendToESP(txData))
+
         
         
     def __del__(self):
