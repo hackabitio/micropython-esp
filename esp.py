@@ -81,7 +81,7 @@ class ESP:
         while self.__uartObj.any()>0:
             self.__rxData += self.__uartObj.read(UART_Rx_BUFFER_LENGTH)
             
-        #print(self.__rxData)
+        print(self.__rxData)
         if ESP_OK_STATUS in self.__rxData:
             return self.__rxData
         elif ESP_ERROR_STATUS in self.__rxData:
@@ -328,7 +328,7 @@ class ESP:
             WIFI AP NOT FOUND when cann't find the target AP
             WIFI CONNECTED when successfully connect with the target AP
         """
-        txData="AT+CWJAP_CUR="+'"'+ssid+'"'+','+'"'+pwd+'"'+"\r\n"
+        txData="AT+CWJAP="+'"'+ssid+'"'+','+'"'+pwd+'"'+"\r\n"
         #print(txData)
         retData = self._sendToESP(txData, delay=15)
         #print(".....")
@@ -374,6 +374,9 @@ class ESP:
         else:
             return False
 
+    """
+    HTTP operations [GET, POST]
+    """
     def _createTCPConnection(self, link, port=80):
         """
         Creates a TCP connection between with the Host.
@@ -477,9 +480,41 @@ class ESP:
             self._sendToESP("AT+CIPCLOSE\r\n")
             return 0, None
         
+    """
+    MQTT operations
+    """
+    
+    def setTime(self):
+        txData="AT+CIPSNTPCFG=1,8,"+'"ntp1.aliyun.com",'+'"ntp2.aliyun.com"'+"\r\n"
+        self._sendToESP(txData,0.2)
+        txData="AT+CIPSNTPTIME?\r\n"
+        retData = self._sendToESP(txData,0.2)
+        print("Setting time here:", retData)
+        return retData
+
+    def mqttUserConf(self):
+        txData="AT+MQTTUSERCFG=0,1,"+'"clientId",'+'"foad",'+'"foadyousefi"'+",0,0,"+'""'+"\r\n"
+        retData = self._sendToESP(txData,0.2)
+        print("Configuring user")
+        return retData
+        
+    def mqttConnectionConf(self):
+        txData="AT+MQTTCONN=0,"+'"mqtt.fibel.no"'+",8883,1\r\n"
+        retData = self._sendToESP(txData,0.2)
+        print("Configuring connection")
+        return retData
+        
+    def mqttPublish(self):
+        txData="AT+MQTTPUB=0,"+'"espm2/rp",'+'"test data",'+"1,0\r\n"
+        retData = self._sendToESP(txData,0.2)
+        #retData=self.__httpResponse.parseHTTP(retData)
+        return retData
+        
+        
     def __del__(self):
         """
         The distaructor for ESP8266 class
         """
         print('Destructor called, ESP8266 deleted.')
         pass
+
