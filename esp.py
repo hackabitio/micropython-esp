@@ -1,3 +1,4 @@
+from typing import Protocol
 from machine import UART, Pin
 import time
 from httpParser import HttpParser
@@ -394,10 +395,10 @@ class ESP:
             True on successfully create and establish a socket connection.
         """
         #self._sendToESP("AT+CIPMUX=0")
+        reqProtocol = "TCP"
         if port == 443:
-            txData="AT+CIPSTART="+'"'+"SSL"+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
-        else:
-            txData="AT+CIPSTART="+'"'+"TCP"+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
+            reqProtocol = "SSL"
+        txData="AT+CIPSTART="+'"'+reqProtocol+'"'+','+'"'+link+'"'+','+str(port)+"\r\n"
         #print("txData:", txData)
         retData = self._sendToESP(txData)
         #print(retData)
@@ -511,8 +512,10 @@ class ESP:
     def mqttPublish(self):
         txData="AT+MQTTPUB=0,"+'"espm2/rp",'+'"test data",'+"1,0\r\n"
         retData = self._sendToESP(txData)
+
+        retData=self.__httpResponse.parseHTTP(retData)
+        return retData, self.__httpResponse.getHTTPResponse()
         #retData=self.__httpResponse.parseHTTP(retData)
-        return retData
         
         
     def __del__(self):
