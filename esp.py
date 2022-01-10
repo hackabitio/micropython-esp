@@ -115,8 +115,8 @@ class ESP:
         This funtion use to Reset the ESP
         
         Return:
-            True if Reset successfully done with the ESP8266
-            False if unable to reset the ESP8266
+            True if Reset successfully done with the ESP
+            False if unable to reset the ESP
         """
         retData = self._sendToESP("AT+RST\r\n")
         if(retData != None):
@@ -134,8 +134,8 @@ class ESP:
         This function use to enable/diable AT command echo [Default set as false for diable Echo]
         
         Return:
-            True if echo off/on command succefully initiate with the ESP8266
-            False if echo off/on command failed to initiate with the ESP8266
+            True if echo off/on command succefully initiate with the ESP
+            False if echo off/on command failed to initiate with the ESP
         
         """
         if enable==False:
@@ -182,10 +182,10 @@ class ESP:
         
     def reStore(self):
         """
-        This function use to reset the ESP8266 into the Factory reset mode & delete previous configurations
+        Reset the ESP into the Factory reset mode & delete previous configurations
         Return:
-            True on ESP8266 restore succesfully
-            False on failed to restore ESP8266
+            True on ESP restore succesfully
+            False on failed to restore ESP
         """
         retData = self._sendToESP("AT+RESTORE\r\n")
         if(retData != None):
@@ -195,25 +195,6 @@ class ESP:
                 return False
         else:
             return None
-    """    
-    def chcekSYSRAM(self):
-        #retData = self._sendToESP("AT+SYSRAM?\r\n")   
-        self.__rxData=b''
-        self.__txData="AT+SYSRAM?\r\n"
-        self.__uartObj.write(self.__txData)
-        self.__rxData=bytes()
-        
-        time.sleep(2)
-        
-        while self.__uartObj.any()>0:
-            self.__rxData += self.__uartObj.read(1)
-            
-        print(self.__rxData.decode())
-        if ESP_OK_STATUS in self.__rxData:
-            return self.__rxData
-        else:
-            return 1
-    """
         
     def getCurrentWiFiMode(self):
         """
