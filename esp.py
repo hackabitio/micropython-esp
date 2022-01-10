@@ -198,15 +198,15 @@ class ESP:
         
     def getCurrentWiFiMode(self):
         """
-        This fucntion use to query ESP8266 WiFi's current mode [STA: Station, SoftAP: Software AccessPoint, or Both]
+        Return WiFi's current mode [STA: Station, SoftAP: Software AccessPoint, or Both]
         
         Return:
-            STA if ESP8266's wifi's current mode pre-config as Station
-            SoftAP if ESP8266's wifi's current mode pre-config as SoftAP
-            SoftAP+STA if ESP8266's wifi's current mode set pre-config Station & SoftAP
+            STA if ESP's wifi's current mode pre-config as Station
+            SoftAP if ESP's wifi's current mode pre-config as SoftAP
+            SoftAP+STA if ESP's wifi's current mode set pre-config Station & SoftAP
             None failed to detect the wifi's current pre-config mode
         """
-        retData = self._sendToESP("AT+CWMODE_CUR?\r\n")
+        retData = self._sendToESP("AT+CWMODE?\r\n")
         if(retData != None):
             if "1" in retData:
                 return "STA"
@@ -222,17 +222,17 @@ class ESP:
         
     def setCurrentWiFiMode(self, mode=3):
         """
-        This fucntion use to set ESP8266 WiFi's current mode [STA: Station, SoftAP: Software AccessPoint, or Both]
+        Set WiFi's current mode [STA: Station, SoftAP: Software AccessPoint, or Both]
         
         Parameter:
-            mode (int): ESP8266 WiFi's [ 1: STA, 2: SoftAP, 3: SoftAP+STA(default)]
+            mode (int): [ 1: STA, 2: SoftAP, 3: SoftAP+STA(default)]
         
         Return:
             True on successfully set the current wifi mode
             False on failed set the current wifi mode
         
         """
-        txData="AT+CWMODE_CUR="+str(mode)+"\r\n"
+        txData="AT+CWMODE="+str(mode)+"\r\n"
         retData = self._sendToESP(txData)
         if(retData!=None):
             if ESP_OK_STATUS in retData:   
